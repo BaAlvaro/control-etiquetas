@@ -13,7 +13,6 @@ type AssignedRange = {
 
 const Dashboard = ({ username, onLogout }: DashboardProps) => {
   const [quantity, setQuantity] = useState<string>("");
-  const [globalCounter, setGlobalCounter] = useState<number>(0);
   const [assignedRange, setAssignedRange] = useState<AssignedRange | null>(null);
   const [error, setError] = useState<string>("");
   const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
@@ -22,7 +21,7 @@ const Dashboard = ({ username, onLogout }: DashboardProps) => {
     setConnectedUsers([username, "nave2_user", "admin"]);
   }, [username]);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const parsedQuantity = parseInt(quantity, 10);
@@ -39,12 +38,29 @@ const Dashboard = ({ username, onLogout }: DashboardProps) => {
       return;
     }
 
-    const start = globalCounter + 1;
-    const end = globalCounter + parsedQuantity;
+    try {
+      const response = await fetch("http://localhost:4000/counter/assign-range", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ quantity: parsedQuantity }),
+      });
 
-    setAssignedRange({ start, end });
-    setGlobalCounter(end);
-    setError("");
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Error al calcular el rango.");
+        setAssignedRange(null);
+        return;
+      }
+
+      setAssignedRange({ start: data.start, end: data.end });
+      setError("");
+    } catch (err) {
+      setError("No se pudo conectar con el servidor.");
+      setAssignedRange(null);
+    }
   };
 
   const sidebarContent = (
