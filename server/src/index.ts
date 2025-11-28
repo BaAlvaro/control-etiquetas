@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import authRouter from "./routes/auth";
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -8,6 +9,8 @@ app.use(cors());
 app.use(express.json());
 
 let globalCounter = 0;
+
+app.use("/auth", authRouter);
 
 app.get("/health", (req, res) => {
   res.json({ status: "ok" });
