@@ -1,13 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import MainLayout from "../layout/MainLayout";
 
-const Dashboard = ({ username, onLogout }) => {
-  const [quantity, setQuantity] = useState("");
-  const [globalCounter, setGlobalCounter] = useState(0);
-  const [assignedRange, setAssignedRange] = useState(null);
-  const [error, setError] = useState("");
+type DashboardProps = {
+  username: string;
+  onLogout: () => void;
+};
 
-  const handleSubmit = (event) => {
+type AssignedRange = {
+  start: number;
+  end: number;
+};
+
+const Dashboard = ({ username, onLogout }: DashboardProps) => {
+  const [quantity, setQuantity] = useState<string>("");
+  const [globalCounter, setGlobalCounter] = useState<number>(0);
+  const [assignedRange, setAssignedRange] = useState<AssignedRange | null>(null);
+  const [error, setError] = useState<string>("");
+  const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
+
+  useEffect(() => {
+    setConnectedUsers([username, "nave2_user", "admin"]);
+  }, [username]);
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const parsedQuantity = parseInt(quantity, 10);
@@ -34,9 +49,23 @@ const Dashboard = ({ username, onLogout }) => {
 
   const sidebarContent = (
     <div>
-      <h3>Menú</h3>
-      <p>Usuario: {username}</p>
-      <button onClick={onLogout}>Cerrar sesión</button>
+      <h3>Usuarios conectados</h3>
+      <ul>
+        {connectedUsers.map((user) => (
+          <li key={user}>{user}</li>
+        ))}
+      </ul>
+
+      <hr style={{ margin: "1rem 0" }} />
+
+      <p>Sesión iniciada como:</p>
+      <p>
+        <strong>{username}</strong>
+      </p>
+
+      <button onClick={onLogout} style={{ marginTop: "1rem" }}>
+        Cerrar sesión
+      </button>
     </div>
   );
 
@@ -44,7 +73,10 @@ const Dashboard = ({ username, onLogout }) => {
     <MainLayout sidebar={sidebarContent}>
       <h2>Asignar rango de etiquetas</h2>
 
-      <form onSubmit={handleSubmit} style={{ maxWidth: 400, marginBottom: "2rem" }}>
+      <form
+        onSubmit={handleSubmit}
+        style={{ maxWidth: 400, marginBottom: "2rem" }}
+      >
         <div style={{ marginBottom: "1rem" }}>
           <label style={{ display: "block", marginBottom: "0.25rem" }}>
             Cantidad de etiquetas (máx. 3000)
@@ -64,17 +96,24 @@ const Dashboard = ({ username, onLogout }) => {
         </button>
       </form>
 
-      {error && (
-        <p style={{ color: "red" }}>
-          {error}
-        </p>
-      )}
+      {error && <p style={{ color: "red" }}>{error}</p>}
 
       {assignedRange && (
-        <div style={{ marginTop: "1.5rem", padding: "1rem", border: "1px solid white", borderRadius: "0.5rem" }}>
+        <div
+          style={{
+            marginTop: "1.5rem",
+            padding: "1rem",
+            border: "1px solid white",
+            borderRadius: "0.5rem",
+          }}
+        >
           <p>Rango asignado:</p>
-          <p>Desde: <strong>{assignedRange.start}</strong></p>
-          <p>Hasta: <strong>{assignedRange.end}</strong></p>
+          <p>
+            Desde: <strong>{assignedRange.start}</strong>
+          </p>
+          <p>
+            Hasta: <strong>{assignedRange.end}</strong>
+          </p>
         </div>
       )}
     </MainLayout>
