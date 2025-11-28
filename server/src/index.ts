@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import authRouter from "./routes/auth";
+import warehousesRouter from "./routes/warehouses";
+import { authenticate, requireAdmin } from "./middleware/auth";
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -11,7 +13,7 @@ app.use(express.json());
 let globalCounter = 0;
 
 app.use("/auth", authRouter);
-
+app.use("/warehouses", authenticate, requireAdmin, warehousesRouter);
 app.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
@@ -28,7 +30,9 @@ app.post("/counter/assign-range", (req, res) => {
   }
 
   if (quantity > 3000) {
-    return res.status(400).json({ error: "La cantidad máxima permitida es 3000" });
+    return res
+      .status(400)
+      .json({ error: "La cantidad máxima permitida es 3000" });
   }
 
   const start = globalCounter + 1;

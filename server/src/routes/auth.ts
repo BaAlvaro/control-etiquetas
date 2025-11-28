@@ -15,13 +15,20 @@ type User = {
 const users: User[] = [];
 let nextUserId = 1;
 
-const JWT_SECRET = "dev-secret-change-later";
+export const JWT_SECRET = "dev-secret-change-later";
+
 
 router.post("/register", async (req: Request, res: Response) => {
-  const { username, password, role } = req.body;
+  const { username, password, role } = (req.body || {}) as {
+    username?: string;
+    password?: string;
+    role?: string;
+  };
 
   if (!username || !password) {
-    return res.status(400).json({ error: "Usuario y contraseña son obligatorios" });
+    return res
+      .status(400)
+      .json({ error: "Usuario y contraseña son obligatorios" });
   }
 
   if (typeof username !== "string" || typeof password !== "string") {
@@ -60,11 +67,17 @@ router.post("/register", async (req: Request, res: Response) => {
   });
 });
 
+
 router.post("/login", async (req: Request, res: Response) => {
-  const { username, password } = req.body;
+  const { username, password } = (req.body || {}) as {
+    username?: string;
+    password?: string;
+  };
 
   if (!username || !password) {
-    return res.status(400).json({ error: "Usuario y contraseña son obligatorios" });
+    return res
+      .status(400)
+      .json({ error: "Usuario y contraseña son obligatorios" });
   }
 
   const user = users.find((u) => u.username === username);
@@ -92,5 +105,6 @@ router.post("/login", async (req: Request, res: Response) => {
     },
   });
 });
+
 
 export default router;
